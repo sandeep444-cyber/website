@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0F1419">
+    <title>eSewa - Mobile Wallet</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0F1419;color:#fff;min-height:100vh}
+        .mobile-container{max-width:430px;margin:0 auto;min-height:100vh;background:#0F1419;position:relative;overflow-x:hidden}
+        
+        /* Header */
+        .dashboard-header{background:#0F1419;padding:12px 16px}
+        .header-top{display:flex;justify-content:space-between;align-items:center}
+        .user-info{display:flex;align-items:center;gap:10px}
+        .user-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid #60BB46;position:relative;background:#E8F5E9}
+        .user-avatar svg{width:100%;height:100%}
+        .user-avatar::after{content:'';position:absolute;bottom:0;right:0;width:12px;height:12px;background:#60BB46;border-radius:50%;border:2px solid #0F1419}
+        .user-details h3{color:#fff;font-size:16px;font-weight:500}
+        .header-actions{display:flex;gap:16px;align-items:center}
+        .icon-btn{width:28px;height:28px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+        
+        /* Balance Card */
+        .balance-section{padding:0 16px;margin-bottom:16px}
+        .balance-card{background:#1A2332;border-radius:16px;padding:16px;position:relative;border:1px solid #2A3441}
+        .balance-row{display:flex;justify-content:space-between;align-items:center}
+        .balance-left,.balance-right{display:flex;align-items:center;gap:10px;flex:1}
+        .balance-right{justify-content:flex-end}
+        .balance-icon-small{width:28px;height:28px}
+        .balance-text{display:flex;flex-direction:column}
+        .balance-label{font-size:11px;color:#8B95A8;margin-bottom:2px}
+        .balance-amount{font-size:18px;font-weight:700;color:#fff}
+        .balance-amount span{font-size:12px;color:#8B95A8;font-weight:400;margin-left:4px}
+        .fonepoints-val{color:#fff;font-size:16px;font-weight:600}
+        .fonepoints-arrow{color:#60BB46;font-size:14px;margin-left:2px}
+        .center-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:#1A2332;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #2A3441;z-index:2}
+        .center-logo svg{width:28px;height:28px}
+        .divider{position:absolute;left:50%;top:15%;bottom:15%;width:1px;background:#2A3441;transform:translateX(-50%)}
+        
+        /* Quick Actions */
+        .quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px;margin-bottom:16px}
+        .quick-action{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+        .quick-action-icon{width:52px;height:52px;display:flex;align-items:center;justify-content:center}
+        .quick-action-icon svg{width:44px;height:44px}
+        .quick-action span{font-size:10px;font-weight:400;text-align:center;color:#8B95A8;line-height:1.2}
+        
+        /* Service Sections */
+        .service-section{margin:0 12px 12px;background:#1A2332;border-radius:16px;padding:16px;border:1px solid #2A3441}
+        .section-title{font-size:14px;font-weight:600;margin-bottom:16px;color:#fff}
+        .services-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 8px}
+        .service-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+        .service-icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+        .service-icon svg{width:40px;height:40px}
+        .service-name{font-size:10px;font-weight:400;text-align:center;color:#8B95A8;line-height:1.2;max-width:70px}
+        .more-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,0.1);border-radius:50%;color:#fff;font-size:18px}
+        
+        /* Bottom Nav */
+        .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0F1419;display:flex;justify-content:space-around;align-items:flex-end;padding:8px 0 16px;border-top:1px solid #1A2332;z-index:100}
+        .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:#6B7280;font-size:10px;font-weight:400;flex:1;padding-bottom:4px;cursor:pointer}
+        .nav-item.active{color:#60BB46}
+        .nav-item svg{width:24px;height:24px}
+        .nav-scan{position:relative;padding-bottom:0}
+        .scan-btn{width:56px;height:56px;background:#60BB46;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(96,187,70,0.4);border:3px solid #0F1419;margin-bottom:4px}
+        .scan-btn svg{width:28px;height:28px}
+        
+        /* QR Scanner */
+        .qr-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:1000;display:none;flex-direction:column}
+        .qr-overlay.active{display:flex}
+        .qr-header{background:rgba(0,0,0,0.8);padding:16px;text-align:center;position:relative;z-index:10}
+        .qr-header h2{color:#fff;font-size:16px;font-weight:500}
+        .close-btn{position:absolute;left:16px;top:16px;color:#fff;font-size:20px;cursor:pointer;background:none;border:none;padding:0}
+        .qr-frame{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+        .qr-video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
+        .qr-box{width:260px;height:260px;border:2px solid #60BB46;border-radius:20px;position:relative;z-index:5;background:transparent}
+        .scan-line{position:absolute;left:10%;right:10%;height:2px;background:#60BB46;animation:scan 2s linear infinite;box-shadow:0 0 10px #60BB46}
+        @keyframes scan{0%{top:10%}50%{top:90%}100%{top:10%}}
+        .qr-hint{position:absolute;bottom:100px;color:#fff;font-size:14px;text-align:center;width:100%;z-index:5}
+        .qr-actions{position:absolute;bottom:30px;left:0;right:0;display:flex;justify-content:center;gap:50px;z-index:5}
+        .qr-action{display:flex;flex-direction:column;align-items:center;gap:4px;color:#fff;font-size:12px;background:none;border:none;cursor:pointer}
+        .qr-action svg{width:28px;height:28px}
+        
+        /* Payment Dialog */
+        .payment-dialog{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:1001;display:none;align-items:center;justify-content:center;padding:20px}
+        .payment-dialog.active{display:flex}
+        .payment-box{background:#1A2332;border-radius:16px;padding:24px;width:100%;max-width:320px;border:1px solid #2A3441}
+        .payment-box h3{color:#fff;font-size:16px;margin-bottom:20px;text-align:center;font-weight:600}
+        .payment-box input{width:100%;padding:14px;border:1px solid #2A3441;border-radius:10px;font-size:15px;background:#0F1419;color:#fff;margin-bottom:12px;outline:none}
+        .payment-box input:focus{border-color:#60BB46}
+        .payment-box button{width:100%;padding:14px;background:#60BB46;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+        
+        /* Transaction Success Screen */
+        .txn-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#F5F5F5;z-index:1002;display:none;flex-direction:column}
+        .txn-overlay.active{display:flex}
+        .txn-header{background:#60BB46;padding:16px;display:flex;align-items:center;justify-content:space-between}
+        .txn-header-left{display:flex;align-items:center;gap:12px}
+        .txn-header-left svg{width:24px;height:24px;color:#fff;cursor:pointer}
+        .txn-header h2{color:#fff;font-size:18px;font-weight:500}
+        .txn-header-right{display:flex;gap:16px}
+        .txn-header-right svg{width:24px;height:24px;color:#fff;cursor:pointer}
+        .txn-content{flex:1;padding:16px;overflow-y:auto}
+        .txn-card{background:#fff;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+        .txn-success-title{color:#6B7280;font-size:14px;text-align:center;margin-bottom:16px;font-weight:600}
+        .txn-checkmark{width:64px;height:64px;margin:0 auto 16px;position:relative}
+        .txn-checkmark svg{width:64px;height:64px}
+        .txn-dots{position:absolute;top:0;left:0;right:0;bottom:0}
+        .txn-dot{position:absolute;width:6px;height:6px;background:#60BB46;border-radius:50%;animation:dotPulse 1.5s ease-in-out infinite}
+        .txn-dot:nth-child(1){top:10%;left:20%;animation-delay:0s}
+        .txn-dot:nth-child(2){top:5%;right:25%;animation-delay:0.3s}
+        .txn-dot:nth-child(3){bottom:20%;left:15%;animation-delay:0.6s}
+        .txn-dot:nth-child(4){bottom:15%;right:20%;animation-delay:0.9s}
+        @keyframes dotPulse{0%,100%{transform:scale(1);opacity:0.6}50%{transform:scale(1.5);opacity:1}}
+        .txn-amount{color:#1F2937;font-size:18px;font-weight:400;text-align:center;margin-bottom:8px}
+        .txn-amount span{font-size:36px;font-weight:700}
+        .txn-recipient{color:#6B7280;font-size:14px;text-align:center;margin-bottom:8px}
+        .txn-date{color:#9CA3AF;font-size:12px;text-align:center;margin-bottom:16px}
+        .txn-view-details{display:flex;align-items:center;justify-content:center;gap:4px;color:#60BB46;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:16px}
+        .txn-view-details svg{width:16px;height:16px}
+        .txn-divider{height:1px;background:#E5E7EB;margin:16px 0}
+        .txn-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .txn-row:last-child{margin-bottom:0}
+        .txn-label{color:#9CA3AF;font-size:13px}
+        .txn-value{color:#1F2937;font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px}
+        .txn-value svg{width:16px;height:16px;color:#9CA3AF;cursor:pointer}
+        .txn-total{border-top:1px solid #E5E7EB;padding-top:12px;margin-top:12px}
+        .txn-total .txn-value{font-size:16px;font-weight:600}
+        .txn-done-btn{width:100%;padding:16px;background:#60BB46;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:16px}
+        .txn-ad{background:#fff;border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+        .txn-ad-icon{width:40px;height:40px;background:#E8F5E9;border-radius:8px;display:flex;align-items:center;justify-content:center}
+        .txn-ad-icon svg{width:24px;height:24px;color:#60BB46}
+        .txn-ad-content{flex:1}
+        .txn-ad-brand{color:#60BB46;font-size:10px;font-weight:500;margin-bottom:2px}
+        .txn-ad-title{color:#1F2937;font-size:14px;font-weight:600}
+        .txn-ad-price{color:#06B6D4;font-size:18px;font-weight:700}
+        .txn-ad-price span{color:#9CA3AF;font-size:10px;font-weight:400}
+        .txn-ad-img{width:80px;height:60px;background:#E5E7EB;border-radius:8px;object-fit:cover}
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="header-top">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#E8F5E9"/><circle cx="20" cy="16" r="8" fill="#4A9A3A"/><ellipse cx="20" cy="32" rx="12" ry="8" fill="#4A9A3A"/></svg>
+                    </div>
+                    <div class="user-details">
+                        <h3>Hi, Sandip</h3>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    </div>
+                    <div class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3a7 7 0 0 0-7 7v4l-2 2h18l-2-2v-4a7 7 0 0 0-7-7z" fill="#F59E0B"/><circle cx="12" cy="21" r="2" fill="#EF4444"/></svg>
+                    </div>
+                    <div class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6" width="16" height="12" rx="4" fill="#A78BFA"/><rect x="7" y="9" width="4" height="4" rx="1" fill="#0F1419"/><rect x="13" y="9" width="4" height="4" rx="1" fill="#0F1419"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Balance Card -->
+        <div class="balance-section">
+            <div class="balance-card">
+                <div class="balance-row">
+                    <div class="balance-left">
+                        <div class="balance-icon-small">
+                            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" fill="#374151"/><circle cx="12" cy="12" r="2" fill="#60BB46"/></svg>
+                        </div>
+                        <div class="balance-text">
+                            <div class="balance-label">Balance</div>
+                            <div class="balance-amount">NPR<span>8478.70</span></div>
+                        </div>
+                    </div>
+                    <div class="balance-right">
+                        <div class="balance-text" style="text-align:right">
+                            <div class="balance-label">Fonepoints</div>
+                            <div class="fonepoints-val">29.6<span class="fonepoints-arrow">›</span></div>
+                        </div>
+                        <div class="balance-icon-small">
+                            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#EF4444" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="3" fill="#EF4444"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="center-logo">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1A2332" stroke="#60BB46" stroke-width="2"/><path d="M12 7v5l3 3" stroke="#60BB46" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="quick-action">
+                <div class="quick-action-icon">
+                    <svg viewBox="0 0 44 44" fill="none"><rect x="8" y="6" width="28" height="32" rx="3" fill="#374151"/><path d="M15 18l7-5 7 5" stroke="#60BB46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 13v14" stroke="#60BB46" stroke-width="2" stroke-linecap="round"/><path d="M15 24h14" stroke="#60BB46" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <span>Load<br>Money</span>
+            </div>
+            <div class="quick-action">
+                <div class="quick-action-icon">
+                    <svg viewBox="0 0 44 44" fill="none"><rect x="8" y="6" width="28" height="32" rx="3" fill="#374151"/><path d="M15 22l7-5 7 5" stroke="#60BB46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 17v12" stroke="#60BB46" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <span>Send<br>Money</span>
+            </div>
+            <div class="quick-action">
+                <div class="quick-action-icon">
+                    <svg viewBox="0 0 44 44" fill="none"><path d="M6 16L22 6l16 10" stroke="#60BB46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="16" width="28" height="18" rx="2" fill="#374151"/><rect x="12" y="20" width="6" height="8" rx="1" fill="#1F2937"/><rect x="20" y="20" width="6" height="8" rx="1" fill="#1F2937"/><rect x="28" y="20" width="6" height="8" rx="1" fill="#1F2937"/></svg>
+                </div>
+                <span>Bank<br>Transfer</span>
+            </div>
+            <div class="quick-action">
+                <div class="quick-action-icon">
+                    <svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="14" stroke="#60BB46" stroke-width="2" fill="none"/><path d="M14 22h16" stroke="#60BB46" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="22" r="6" fill="#374151"/><path d="M26 16l6 6-6 6" stroke="#60BB46" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <span>Remittance</span>
+            </div>
+        </div>
+        
+        <!-- Utility & Bill Payments -->
+        <div class="service-section">
+            <h2 class="section-title">Utility & Bill Payments</h2>
+            <div class="services-grid">
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><rect x="10" y="4" width="20" height="32" rx="3" fill="#374151"/><circle cx="15" cy="12" r="2" fill="#60BB46"/><circle cx="25" cy="12" r="2" fill="#60BB46"/><circle cx="15" cy="20" r="2" fill="#60BB46"/><circle cx="25" cy="20" r="2" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Topup<br>& Data</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="14" fill="#374151"/><path d="M20 8v10" stroke="#60BB46" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="20" r="5" fill="#F59E0B"/></svg>
+                    </div>
+                    <span class="service-name">Electricity</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><rect x="14" y="8" width="12" height="24" rx="2" fill="#374151"/><rect x="16" y="16" width="8" height="12" rx="1" fill="#60BB46" fill-opacity="0.3"/></svg>
+                    </div>
+                    <span class="service-name">Khanepani</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><rect x="8" y="16" width="24" height="14" rx="2" fill="#374151"/><path d="M12 22h16" stroke="#60BB46" stroke-width="2" stroke-linecap="round"/><path d="M10 10c0-5 10-8 10-8s10 3 10 8" stroke="#60BB46" stroke-width="2"/></svg>
+                    </div>
+                    <span class="service-name">Internet</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><path d="M6 16h28v18H6V16z" fill="#374151"/><path d="M2 16L20 6l18 10" stroke="#60BB46" stroke-width="2"/></svg>
+                    </div>
+                    <span class="service-name">Govt.<br>Payment</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><rect x="15" y="4" width="10" height="32" rx="2" fill="#374151"/><circle cx="20" cy="12" r="3" fill="#EF4444"/><circle cx="20" cy="20" r="3" fill="#F59E0B"/><circle cx="20" cy="28" r="3" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Traffic Fine<br>Payment</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><path d="M20 4L4 14l16 10 16-10L20 4z" fill="#374151"/><path d="M8 16v10" stroke="#1F2937" stroke-width="2"/><path d="M20 24v10" stroke="#1F2937" stroke-width="2"/><circle cx="8" cy="30" r="4" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Education<br>Fee</span>
+                </div>
+                <div class="service-item">
+                    <div class="more-btn">›</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Travels & Ticketing -->
+        <div class="service-section">
+            <h2 class="section-title">Travels & Ticketing</h2>
+            <div class="services-grid">
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><path d="M4 22l10-4-5-8 4-2 10 8 8-2c2-1 4 1 4 3s-2 3-4 4l-14 8-4 6-3-2 2-6-8-5z" fill="#374151"/><circle cx="32" cy="20" r="5" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Airlines</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="16" stroke="#374151" stroke-width="2" fill="none"/><path d="M4 20h32" stroke="#374151"/><path d="M20 4s8 7 8 16-8 16-8 16" stroke="#60BB46" stroke-width="2"/><path d="M20 4s-8 7-8 16 8 16 8 16" stroke="#60BB46" stroke-width="2"/></svg>
+                    </div>
+                    <span class="service-name">Intl Airlines</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="28" height="24" rx="2" fill="#374151"/><rect x="10" y="14" width="6" height="6" rx="1" fill="#1F2937"/><rect x="18" y="14" width="6" height="6" rx="1" fill="#1F2937"/><rect x="26" y="14" width="6" height="6" rx="1" fill="#1F2937"/><circle cx="32" cy="10" r="5" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Hotels</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="28" height="20" rx="3" fill="#374151"/><rect x="10" y="14" width="20" height="10" rx="1" fill="#1F2937"/><circle cx="11" cy="33" r="4" fill="#1F2937"/><circle cx="29" cy="33" r="4" fill="#1F2937"/><rect x="8" y="28" width="24" height="4" rx="1" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Bus Ticket</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="28" height="20" rx="2" fill="#374151"/><path d="M14 18l-4 4 4 4" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="18" y="14" width="12" height="12" rx="1" fill="#1F2937"/><circle cx="32" cy="32" r="5" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Movies</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><path d="M4 6h32" stroke="#374151" stroke-width="2" stroke-linecap="round"/><rect x="14" y="18" width="12" height="12" rx="2" fill="#374151"/><path d="M20 18V6" stroke="#60BB46" stroke-width="2"/><circle cx="32" cy="32" r="5" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Cable Car</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="28" height="24" rx="2" fill="#374151"/><rect x="10" y="14" width="20" height="16" rx="1" fill="#1F2937"/><path d="M13 8v4M27 8v4" stroke="#60BB46" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <span class="service-name">Events</span>
+                </div>
+                <div class="service-item">
+                    <div class="more-btn">›</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Insurance -->
+        <div class="service-section">
+            <h2 class="section-title">Insurance</h2>
+            <div class="services-grid">
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><path d="M20 4L6 12v10c0 10 6 18 14 20 8-2 14-10 14-20V12L20 4z" fill="#374151"/><path d="M20 8l-10 6v8c0 7 4 13 10 15 6-2 10-8 10-15v-8L20 8z" fill="#1F2937"/><circle cx="20" cy="22" r="6" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Life</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><rect x="10" y="4" width="20" height="32" rx="2" fill="#374151"/><rect x="14" y="10" width="12" height="22" rx="1" fill="#1F2937"/><path d="M20 16v12" stroke="#60BB46" stroke-width="3" stroke-linecap="round"/><path d="M14 22h12" stroke="#60BB46" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="32" r="5" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Health</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon">
+                        <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="12" width="32" height="18" rx="3" fill="#374151"/><rect x="8" y="16" width="24" height="10" rx="1" fill="#1F2937"/><circle cx="20" cy="21" r="5" fill="#60BB46"/></svg>
+                    </div>
+                    <span class="service-name">Vehicle</span>
+                </div>
+                <div class="service-item">
+                    <div class="more-btn">›</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#60BB46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Home</span>
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>Statement</span>
+            </div>
+            <div class="nav-item nav-scan" onclick="openQRScanner()">
+                <div class="scan-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </div>
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Support</span>
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>More</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QR Scanner Overlay -->
+    <div class="qr-overlay" id="qrOverlay">
+        <div class="qr-header">
+            <button class="close-btn" onclick="closeQRScanner()">←</button>
+            <h2>Scan to Pay</h2>
+        </div>
+        <div class="qr-frame">
+            <video class="qr-video" id="qrVideo" autoplay playsinline></video>
+            <div class="qr-box">
+                <div class="scan-line"></div>
+            </div>
+            <div class="qr-hint">Align QR code within the frame</div>
+            <div class="qr-actions">
+                <button class="qr-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    Flash
+                </button>
+                <button class="qr-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                    Gallery
+                </button>
+                <button class="qr-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    My Code
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Payment Dialog -->
+    <div class="payment-dialog" id="paymentDialog">
+        <div class="payment-box">
+            <h3>Enter Payment Details</h3>
+            <input type="text" id="recipientName" placeholder="Recipient Name">
+            <input type="number" id="paymentAmount" placeholder="Amount (NPR)">
+            <button onclick="processPayment()">Pay Now</button>
+        </div>
+    </div>
+    
+    <!-- Transaction Success Screen -->
+    <div class="txn-overlay" id="successMessage">
+        <div class="txn-header">
+            <div class="txn-header-left">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="closeSuccess()"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <h2>Transaction</h2>
+            </div>
+            <div class="txn-header-right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+        </div>
+        <div class="txn-content">
+            <div class="txn-card">
+                <div class="txn-success-title"><b>Payment Successful !</b></div>
+                <div class="txn-checkmark">
+                    <svg viewBox="0 0 64 64" fill="none"><path d="M32 8c-2 0-4 1-4 3v2c-11 2-20 11-20 22 0 13 10 23 24 23s24-10 24-23c0-11-9-20-20-22v-2c0-2-2-3-4-3z" fill="#60BB46"/><circle cx="32" cy="35" r="16" fill="#fff"/><path d="M26 35l4 4 8-10" stroke="#60BB46" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div class="txn-dots">
+                        <div class="txn-dot"></div>
+                        <div class="txn-dot"></div>
+                        <div class="txn-dot"></div>
+                        <div class="txn-dot"></div>
+                    </div>
+                </div>
+                <div class="txn-amount">NPR <span id="txnAmount">500.00</span></div>
+                <div class="txn-recipient" id="txnRecipient">Money transferred to <strong>NMB BANK LTD.</strong></div>
+                <div class="txn-date" id="txnDate">28 DEC, 2025 08:28 AM</div>
+                <div class="txn-view-details">
+                    View Details
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#60BB46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+                <div class="txn-divider"></div>
+                <div class="txn-row">
+                    <span class="txn-label">Transaction Code</span>
+                    <span class="txn-value">18OM2O9 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+                </div>
+                <div class="txn-row">
+                    <span class="txn-label">Service Charge</span>
+                    <span class="txn-value">10.00</span>
+                </div>
+                <div class="txn-row txn-total">
+                    <span class="txn-label">Total Paying Amount</span>
+                    <span class="txn-value" id="txnTotal">NPR 510.00</span>
+                </div>
+            </div>
+            <button class="txn-done-btn" onclick="closeSuccess()">DONE </button>
+            <div class="txn-ad">
+                <div class="txn-ad-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#60BB46" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="txn-ad-content">
+                    <div class="txn-ad-brand">Sahara Health Insurance</div>
+                    <div class="txn-ad-title">Starting at</div>
+                    <div class="txn-ad-price">Rs. 1,399 <span>(Coverage upto Rs. 6 lakhs)</span></div>
+                </div>
+                <div class="txn-ad-img"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let videoStream = null;
+        
+        async function openQRScanner() {
+            document.getElementById('qrOverlay').classList.add('active');
+            
+            // Start camera
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                const video = document.getElementById('qrVideo');
+                video.srcObject = videoStream;
+            } catch (err) {
+                console.log('Camera access denied or not available');
+            }
+            
+            // Auto close after 3 seconds and show payment dialog
+            setTimeout(() => {
+                closeQRScanner();
+                document.getElementById('paymentDialog').classList.add('active');
+            }, 3000);
+        }
+        
+        function closeQRScanner() {
+            document.getElementById('qrOverlay').classList.remove('active');
+            // Stop camera
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+        }
+        
+        function processPayment() {
+            const name = document.getElementById('recipientName').value;
+            const amount = document.getElementById('paymentAmount').value;
+            if (!name || !amount) {
+                alert('Please enter both name and amount');
+                return;
+            }
+            document.getElementById('paymentDialog').classList.remove('active');
+            const total = parseFloat(amount) + 10;
+            document.getElementById('txnAmount').textContent = parseFloat(amount).toFixed(2);
+            document.getElementById('txnRecipient').innerHTML = 'Money transferred to <strong>' + name + '</strong>';
+            document.getElementById('txnTotal').textContent = 'NPR ' + total.toFixed(2);
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}).toUpperCase();
+            const timeStr = now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('txnDate').textContent = dateStr + ' ' + timeStr;
+            document.getElementById('successMessage').classList.add('active');
+            document.getElementById('recipientName').value = '';
+            document.getElementById('paymentAmount').value = '';
+        }
+        
+        function closeSuccess() {
+            document.getElementById('successMessage').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
